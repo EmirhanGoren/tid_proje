@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TİD Mobil - Liderlik Tablosu & Sınav</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+
+    <style>
+        .page { display: none; }
+        .active { display: block; }
+        #video-container { position: relative; width: 100%; max-width: 640px; margin: auto; background: #000; border-radius: 1.5rem; overflow: hidden; aspect-ratio: 4/3; }
+        video { position: absolute; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        canvas { position: absolute; width: 100%; height: 100%; transform: scaleX(-1); z-index: 10; }
+        .success-pulse { animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { background-color: #22c55e; } 50% { background-color: #16a34a; } 100% { background-color: #22c55e; } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+
+    <header id="top-panel" class="bg-blue-600 text-white p-4 shadow-lg sticky top-0 z-50 transition-colors duration-300">
+        <div class="flex justify-between items-center max-w-2xl mx-auto">
+            <h1 id="page-title" class="text-lg font-black uppercase tracking-tighter">TİD Mobil</h1>
+            <div id="user-info-header" class="hidden flex items-center space-x-4 text-sm font-bold bg-blue-700 py-1 px-4 rounded-full shadow-inner">
+                <span><i class="fas fa-user mr-1"></i> <span id="header-username">Kullanıcı</span></span>
+                <span class="text-yellow-300"><i class="fas fa-star mr-1"></i> <span id="header-score">0</span></span>
+                <button onclick="logoutUser()" class="ml-2 text-red-300 hover:text-red-100 transition-colors" title="Çıkış Yap">
+                    <i class="fas fa-sign-out-alt text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="p-4 pb-28 max-w-2xl mx-auto">
+        
+        <div id="login" class="page text-center mt-10">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-inner"><i class="fas fa-user-lock"></i></div>
+                <h2 class="text-2xl font-black mb-2">TİD Sistemine Giriş</h2>
+                <input type="text" id="username-input" placeholder="Kullanıcı Adı" class="w-full bg-gray-50 border-2 border-gray-200 p-4 rounded-2xl font-bold text-center mb-3 focus:outline-none focus:border-blue-500 transition">
+                <input type="password" id="password-input" placeholder="Şifre" class="w-full bg-gray-50 border-2 border-gray-200 p-4 rounded-2xl font-bold text-center mb-6 focus:outline-none focus:border-blue-500 transition">
+                <div class="flex space-x-3">
+                    <button onclick="loginUser()" class="w-1/2 bg-blue-600 text-white p-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">GİRİŞ YAP</button>
+                    <button onclick="registerUser()" class="w-1/2 bg-green-500 text-white p-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">KAYIT OL</button>
+                </div>
+                <p id="login-error" class="text-red-500 text-sm font-bold mt-4 hidden"></p>
+            </div>
+        </div>
+
+        <div id="home" class="page">
+            <div class="bg-white p-6 rounded-3xl shadow-sm mb-6 text-center border border-gray-200">
+                <h2 class="text-xl font-bold">Eğitim Haritası</h2>
+                <p class="text-gray-500 text-sm mt-1 font-medium">Pratik yapmak için bir ünite seç.</p>
+            </div>
+            <div id="unit-list" class="space-y-3"><div class="animate-pulse text-center text-gray-400 font-bold p-10">Yükleniyor...</div></div>
+        </div>
+
+        <div id="word-list-page" class="page">
+            <div class="bg-blue-50 p-6 rounded-3xl shadow-inner mb-6 text-center border border-blue-100">
+                <h2 id="selected-unit-title" class="text-2xl font-black text-blue-700 uppercase">---</h2>
+            </div>
+            <button onclick="startExamMode()" class="w-full mb-6 bg-gradient-to-r from-purple-500 to-indigo-500 text-white p-5 rounded-2xl font-black text-lg shadow-lg active:scale-95 transition-all flex justify-between items-center">
+                <span>SINAVA BAŞLA (5 Soru)</span><i class="fas fa-stopwatch text-2xl"></i>
+            </button>
+            <h3 class="font-bold text-gray-400 mb-3 ml-2 text-xs uppercase tracking-widest">Alıştırma Modu</h3>
+            <div id="word-container" class="grid grid-cols-2 gap-3"></div>
+            <button onclick="showHome()" class="w-full mt-6 bg-gray-200 text-gray-500 p-4 rounded-2xl font-bold active:scale-95 transition-all">GERİ DÖN</button>
+        </div>
+
+        <div id="study" class="page">
+            <div id="exam-header" class="hidden bg-purple-100 border border-purple-200 p-4 rounded-2xl mb-4 flex justify-between items-center shadow-sm">
+                <span id="exam-question-info" class="text-purple-700 font-black text-sm uppercase">SORU: 1 / 5</span>
+                <span id="exam-score-info" class="text-purple-700 font-bold text-sm bg-white px-3 py-1 rounded-full">Puan: 0</span>
+            </div>
+
+            <div id="video-container" class="border-4 border-white shadow-2xl relative">
+                <video id="input_video" autoplay playsinline></video>
+                <canvas id="output_canvas"></canvas>
+            </div>
+            
+            <div class="mt-4 bg-white p-6 rounded-3xl shadow-sm text-center border border-gray-200 relative overflow-hidden">
+                <div id="point-popup" class="absolute top-2 right-4 text-green-500 font-black text-xl opacity-0 transition-all transform translate-y-4">+0 Puan</div>
+                
+                <span id="step-info" class="text-blue-500 font-black text-xs uppercase tracking-widest bg-blue-50 py-1 px-3 rounded-full">AŞAMA: 1 / 2</span>
+                <h3 id="target-word" class="text-4xl font-black text-gray-800 mt-3 mb-1 uppercase tracking-tight">---</h3>
+                
+                <p id="error-feedback" class="text-orange-500 text-xs font-bold mt-2 bg-orange-50 py-1 rounded-lg hidden">Hata: 0.00 / Parmak: X</p>
+                <p id="status-hint" class="text-gray-400 text-sm font-bold mt-2">Kamera Bekleniyor...</p>
+            </div>
+
+            <button onclick="stopStudy()" class="w-full mt-4 bg-red-100 text-red-500 p-4 rounded-2xl font-bold active:scale-95 transition-all">DERSİ BİTİR</button>
+        </div>
+
+        <div id="score-page" class="page">
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-3xl shadow-lg mb-6 text-center text-white flex justify-between items-center">
+                <div class="text-left">
+                    <h2 class="text-xs font-medium opacity-80 uppercase tracking-widest">Senin Toplam Puanın</h2>
+                    <p id="score-total-display" class="text-4xl font-black mt-1">0</p>
+                </div>
+                <i class="fas fa-trophy text-5xl text-yellow-300 opacity-80"></i>
+            </div>
+
+            <h3 class="font-bold text-gray-500 mb-3 ml-2 text-xs uppercase tracking-widest">🏆 Liderlik Tablosu (Global)</h3>
+            <div id="leaderboard-list" class="space-y-3 mb-8">
+                </div>
+
+            <h3 class="font-bold text-gray-500 mb-3 ml-2 text-xs uppercase tracking-widest">📜 Kendi Sınav Geçmişin</h3>
+            <div id="exam-history-list" class="space-y-3">
+                </div>
+        </div>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t flex justify-around p-3 pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-50">
+        <button onclick="showHome()" class="flex flex-col items-center text-blue-600"><i class="fas fa-map-marked-alt text-xl mb-1"></i><span class="text-[10px] font-bold">Harita</span></button>
+        <button onclick="showScoreboard()" class="flex flex-col items-center text-gray-400 hover:text-blue-500 transition-colors"><i class="fas fa-award text-xl mb-1"></i><span class="text-[10px] font-bold">Skorlar</span></button>
+    </nav>
+
+    <script>
+        let tumVeri = {}, secilenUnite = "", hedefAsamalar = [], mevcutAsama = 0, dogruYapildiMi = false, hareketKilidi = false;
+        const KONUM_ZORLUK = 0.25, MESAFE_ZORLUK = 0.15;
+        let wordStartTime = 0, isExamMode = false, examWordsList = [], currentExamWordIndex = 0, currentExamScore = 0;
+        let isCameraActive = false, isCameraInitialized = false;
+
+        let usersDB = JSON.parse(localStorage.getItem('tidUsersDatabase')) || {}; 
+        let activeUsername = localStorage.getItem('tidActiveUser'); 
+        let userData = { username: "", password: "", totalScore: 0, unitScores: {}, exams: [] };
+
+        const errorMsg = document.getElementById('login-error');
+        const videoElement = document.getElementById('input_video');
+        const canvasElement = document.getElementById('output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const errorFeedback = document.getElementById('error-feedback');
+        const topPanel = document.getElementById('top-panel');
+        const statusHint = document.getElementById('status-hint');
+
+        // --- KULLANICI YÖNETİMİ ---
+        function checkUserSession() {
+            if (activeUsername && usersDB[activeUsername]) {
+                userData = usersDB[activeUsername];
+                document.getElementById('header-username').innerText = userData.username;
+                document.getElementById('header-score').innerText = userData.totalScore;
+                document.getElementById('user-info-header').classList.remove('hidden');
+                loadData();
+            } else {
+                changePage('login', 'SİSTEME GİRİŞ');
+                document.getElementById('user-info-header').classList.add('hidden');
+            }
+        }
+
+        function registerUser() {
+            const user = document.getElementById('username-input').value.trim();
+            const pass = document.getElementById('password-input').value.trim();
+            if (user.length < 3 || pass.length < 3) return showError("En az 3 haneli bilgi girin.");
+            if (usersDB[user]) return showError("Bu kullanıcı adı alınmış.");
+            userData = { username: user, password: pass, totalScore: 0, unitScores: {}, exams: [] };
+            usersDB[user] = userData; activeUsername = user;
+            saveDatabase(); checkUserSession();
+        }
+
+        function loginUser() {
+            const user = document.getElementById('username-input').value.trim();
+            const pass = document.getElementById('password-input').value.trim();
+            if (!usersDB[user]) return showError("Kullanıcı bulunamadı.");
+            if (usersDB[user].password !== pass) return showError("Hatalı şifre.");
+            activeUsername = user; userData = usersDB[user];
+            saveDatabase(); checkUserSession();
+        }
+
+        function logoutUser() {
+            if (confirm("Çıkış yapmak istediğine emin misin?")) {
+                localStorage.removeItem('tidActiveUser'); 
+                activeUsername = null;
+                document.getElementById('username-input').value = "";
+                document.getElementById('password-input').value = "";
+                errorMsg.classList.add('hidden');
+                checkUserSession();
+            }
+        }
+
+        function saveDatabase() {
+            usersDB[userData.username] = userData; 
+            localStorage.setItem('tidUsersDatabase', JSON.stringify(usersDB)); 
+            localStorage.setItem('tidActiveUser', activeUsername); 
+            document.getElementById('header-score').innerText = userData.totalScore;
+        }
+
+        function showError(text) { errorMsg.innerText = text; errorMsg.classList.remove('hidden'); }
+
+        // --- VERİ YÜKLEME ---
+        async function loadData() {
+            try {
+                const res = await fetch('veri_seti.json');
+                tumVeri = await res.json();
+                renderUnits();
+                changePage('home', 'EĞİTİM HARİTASI');
+            } catch (e) {
+                document.getElementById('unit-list').innerHTML = "<p class='text-red-500 font-bold'>HATA: veri_seti.json okunamadı!</p>";
+            }
+        }
+
+        function renderUnits() {
+            const list = document.getElementById('unit-list'); list.innerHTML = "";
+            Object.keys(tumVeri).forEach(unite => {
+                const b = document.createElement('button');
+                b.className = "w-full bg-white p-5 rounded-2xl border-b-4 border-gray-200 flex justify-between items-center mb-3 active:translate-y-1 active:border-b-0 shadow-sm transition-all";
+                b.innerHTML = `<span class="font-black text-gray-700 uppercase">${unite.replace(/_/g, ' ')}</span><i class="fas fa-play text-blue-500"></i>`;
+                b.onclick = () => selectUnit(unite);
+                list.appendChild(b);
+            });
+        }
+
+        function selectUnit(unite) {
+            secilenUnite = unite;
+            document.getElementById('selected-unit-title').innerText = unite.replace(/_/g, ' ');
+            const container = document.getElementById('word-container'); container.innerHTML = "";
+            Object.keys(tumVeri[unite]).forEach(kelime => {
+                const b = document.createElement('button');
+                b.className = "bg-white p-4 rounded-xl border-b-4 border-blue-100 flex flex-col items-center active:translate-y-1 active:border-b-0 transition-all shadow-sm";
+                b.innerHTML = `<i class="fas fa-hand-paper text-blue-400 text-2xl mb-2"></i><span class="font-bold text-gray-700 text-sm uppercase">${kelime}</span>`;
+                b.onclick = () => startPracticeMode(kelime);
+                container.appendChild(b);
+            });
+            changePage('word-list-page', 'KELİMELER');
+        }
+
+        function calculateDynamicScore() {
+            const timeTakenInSeconds = (Date.now() - wordStartTime) / 1000;
+            const stageCount = hedefAsamalar.length;
+            let baseScore = stageCount * 50; 
+            let timeBonus = Math.max(0, Math.floor(15 - timeTakenInSeconds)) * 5; 
+            return baseScore + timeBonus;
+        }
+
+        // --- EĞİTİM / SINAV MODU ---
+        function startPracticeMode(kelime) {
+            isExamMode = false; document.getElementById('exam-header').classList.add('hidden');
+            setupWord(kelime); startStudy();
+        }
+
+        function startExamMode() {
+            isExamMode = true; currentExamScore = 0; currentExamWordIndex = 0;
+            let tumKelimeler = [...Object.keys(tumVeri[secilenUnite])];
+            examWordsList = tumKelimeler.sort(() => 0.5 - Math.random()).slice(0, 5); 
+            document.getElementById('exam-header').classList.remove('hidden');
+            updateExamProgress(); setupWord(examWordsList[0]); startStudy();
+        }
+
+        function setupWord(kelime) {
+            hedefAsamalar = tumVeri[secilenUnite][kelime];
+            document.getElementById('target-word').innerText = kelime;
+            // AŞAMA BİLGİSİNİ HER ZAMAN GÜNCELLE
+            document.getElementById('step-info').innerText = `AŞAMA: 1 / ${hedefAsamalar.length}`;
+            mevcutAsama = 0; dogruYapildiMi = false; hareketKilidi = false;
+            errorFeedback.classList.add('hidden'); 
+            wordStartTime = Date.now(); 
+        }
+
+        function updateExamProgress() {
+            document.getElementById('exam-question-info').innerText = `SORU: ${currentExamWordIndex + 1} / ${examWordsList.length}`;
+            document.getElementById('exam-score-info').innerText = `Puan: ${currentExamScore}`;
+        }
+
+        function showPointAnimation(points) {
+            const popup = document.getElementById('point-popup');
+            popup.innerText = `+${points} PUAN!`;
+            popup.style.opacity = 1; popup.style.transform = 'translateY(0)';
+            setTimeout(() => { popup.style.opacity = 0; popup.style.transform = 'translateY(1rem)'; }, 1500);
+        }
+
+        // --- SKOR VE LİDERLİK TABLOSU ---
+        function showScoreboard() {
+            document.getElementById('score-total-display').innerText = userData.totalScore;
+            
+            // 1. LİDERLİK TABLOSUNU OLUŞTUR
+            const leaderList = document.getElementById('leaderboard-list');
+            leaderList.innerHTML = "";
+            
+            // Tüm kullanıcıları al ve puana göre sırala
+            const allUsers = Object.values(usersDB).sort((a, b) => b.totalScore - a.totalScore);
+            
+            allUsers.forEach((user, index) => {
+                let medal = "";
+                if (index === 0) medal = "🥇";
+                else if (index === 1) medal = "🥈";
+                else if (index === 2) medal = "🥉";
+                else medal = `<span class="text-gray-400 font-bold">${index + 1}</span>`;
+                
+                const isMe = user.username === userData.username;
+                const bgClass = isMe ? "bg-blue-50 border-blue-200" : "bg-white border-gray-100";
+                
+                const el = document.createElement('div');
+                el.className = `p-4 rounded-xl shadow-sm border flex justify-between items-center ${bgClass}`;
+                el.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 text-center text-xl">${medal}</div>
+                        <p class="font-bold ${isMe ? 'text-blue-700' : 'text-gray-800'} uppercase">${user.username}</p>
+                    </div>
+                    <div class="bg-gray-100 text-gray-700 font-black px-3 py-1 rounded-lg">${user.totalScore}</div>
+                `;
+                leaderList.appendChild(el);
+            });
+
+            // 2. KENDİ SINAV GEÇMİŞİNİ OLUŞTUR
+            const historyList = document.getElementById('exam-history-list');
+            historyList.innerHTML = "";
+            if(userData.exams.length === 0) {
+                historyList.innerHTML = "<p class='text-center text-gray-400 text-sm mt-5'>Henüz hiç sınava girmedin.</p>";
+            } else {
+                [...userData.exams].reverse().forEach(exam => {
+                    const el = document.createElement('div');
+                    el.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center";
+                    el.innerHTML = `<div><p class="font-bold text-gray-800 uppercase">${exam.unit.replace(/_/g, ' ')}</p><p class="text-xs text-gray-400">${exam.date}</p></div><div class="bg-blue-100 text-blue-700 font-black px-3 py-1 rounded-lg">+${exam.score}</div>`;
+                    historyList.appendChild(el);
+                });
+            }
+            changePage('score-page', 'SKOR TABLOSU');
+        }
+
+        // --- MEDIAPIPE AI ---
+        const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+        hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+
+        hands.onResults((results) => {
+            canvasElement.width = videoElement.videoWidth || 640;
+            canvasElement.height = videoElement.videoHeight || 480;
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.multiHandLandmarks) {
+                const currentHands = [];
+                for (const landmarks of results.multiHandLandmarks) {
+                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#3B82F6', lineWidth: 4});
+                    drawLandmarks(canvasCtx, landmarks, {color: '#FFFFFF', lineWidth: 2, radius: 3});
+                    currentHands.push(landmarks);
+                }
+                
+                if (!dogruYapildiMi) {
+                    currentHands.sort((a, b) => a[0].x - b[0].x);
+                    const hedef = hedefAsamalar[mevcutAsama];
+
+                    if (currentHands.length === hedef.length) {
+                        let suAnkiPozDogru = true, canliMesafe = -1, maxKonumHatasi = 0, parmakHataVarMi = false;
+                        
+                        if (currentHands.length === 2) {
+                            const h1 = currentHands[0][0], h2 = currentHands[1][0];
+                            canliMesafe = Math.sqrt(Math.pow(h1.x - h2.x, 2) + Math.pow(h1.y - h2.y, 2));
+                        }
+                        
+                        for (let i = 0; i < hedef.length; i++) {
+                            const pTips = [8,12,16,20], pBases = [6,10,14,18];
+                            let pDurum = [currentHands[i][4].x > currentHands[i][3].x ? "acik" : "kapali"];
+                            for(let j=0; j<4; j++) pDurum.push(currentHands[i][pTips[j]].y < currentHands[i][pBases[j]].y ? "acik" : "kapali");
+                            
+                            const pDogru = JSON.stringify(pDurum) === JSON.stringify(hedef[i].parmaklar);
+                            if (!pDogru) parmakHataVarMi = true;
+
+                            const ax = currentHands[i][0].x, ay = currentHands[i][0].y;
+                            const hx = hedef[i].konum.x, hy = hedef[i].konum.y;
+                            const konumHatasi = Math.sqrt(Math.pow(ax - hx, 2) + Math.pow(ay - hy, 2));
+                            if(konumHatasi > maxKonumHatasi) maxKonumHatasi = konumHatasi;
+
+                            let mesafeDogru = true;
+                            if (hedef[i].eller_arasi_mesafe !== -1 && canliMesafe !== -1) {
+                                if (Math.abs(canliMesafe - hedef[i].eller_arasi_mesafe) > MESAFE_ZORLUK) mesafeDogru = false;
+                            }
+
+                            if (!pDogru || konumHatasi > KONUM_ZORLUK || !mesafeDogru) suAnkiPozDogru = false; 
+                        }
+
+                        if (!suAnkiPozDogru) {
+                            errorFeedback.classList.remove('hidden');
+                            errorFeedback.innerText = `Hata: ${maxKonumHatasi.toFixed(2)} (Lim:<${KONUM_ZORLUK}) | Parmak: ${parmakHataVarMi ? 'Yanlış' : 'Doğru'}`;
+                        } else errorFeedback.classList.add('hidden');
+
+                        if (hareketKilidi) {
+                            statusHint.innerText = "ELİNİ OYNAT VE DİĞER POZA GEÇ!";
+                            statusHint.className = "text-orange-500 font-black text-sm mt-2";
+                            if (!suAnkiPozDogru) hareketKilidi = false; 
+                        } else {
+                            if (suAnkiPozDogru) {
+                                if (mevcutAsama < hedefAsamalar.length - 1) {
+                                    mevcutAsama++; hareketKilidi = true;
+                                    // SADECE AŞAMAYI GÜNCELLE
+                                    document.getElementById('step-info').innerText = `AŞAMA: ${mevcutAsama+1} / ${hedefAsamalar.length}`;
+                                    statusHint.innerText = "HARİKA! SIRADAKİ HAREKET...";
+                                } else {
+                                    dogruYapildiMi = true;
+                                    errorFeedback.classList.add('hidden');
+                                    const kazanilanPuan = calculateDynamicScore();
+                                    
+                                    statusHint.innerText = "MÜKEMMEL!";
+                                    statusHint.className = "text-green-600 font-black text-lg mt-2";
+                                    topPanel.classList.add('success-pulse');
+                                    showPointAnimation(kazanilanPuan);
+
+                                    if (isExamMode) {
+                                        currentExamScore += kazanilanPuan;
+                                        currentExamWordIndex++;
+                                        setTimeout(() => {
+                                            topPanel.classList.remove('success-pulse');
+                                            if (currentExamWordIndex < examWordsList.length) {
+                                                updateExamProgress(); setupWord(examWordsList[currentExamWordIndex]);
+                                            } else {
+                                                userData.totalScore += currentExamScore;
+                                                userData.exams.push({ unit: secilenUnite, score: currentExamScore, date: new Date().toLocaleDateString() });
+                                                saveDatabase(); alert(`Tebrikler! Sınav Bitti.\nKazanılan Puan: ${currentExamScore}`); stopStudy();
+                                            }
+                                        }, 2000);
+                                    } else {
+                                        userData.totalScore += kazanilanPuan;
+                                        saveDatabase(); setTimeout(stopStudy, 2000);
+                                    }
+                                }
+                            } else {
+                                statusHint.innerText = "Pozisyon Ayarlanıyor...";
+                                statusHint.className = "text-gray-400 text-sm mt-2 font-bold";
+                            }
+                        }
+                    } else statusHint.innerText = `Lütfen ${hedef.length} elinizi kullanın.`;
+                }
+            }
+            canvasCtx.restore();
+        });
+
+        const camera = new Camera(videoElement, { onFrame: async () => { if(isCameraActive) await hands.send({image: videoElement}); }, width: 640, height: 480 });
+
+        function startStudy() { changePage('study', isExamMode ? 'SINAV MODU' : 'ALIŞTIRMA MODU'); isCameraActive = true; if(!isCameraInitialized) { camera.start(); isCameraInitialized = true; } }
+        function showHome() { isCameraActive = false; topPanel.classList.remove('success-pulse'); renderUnits(); changePage('home', 'EĞİTİM HARİTASI'); updateNavColors('Ev'); }
+        function stopStudy() { isCameraActive = false; topPanel.classList.remove('success-pulse'); changePage('word-list-page', 'KELİMELER'); }
+        
+        function changePage(pageId, title) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.getElementById('page-title').innerText = title;
+            if(pageId === 'score-page') updateNavColors('Skorlar');
+        }
+
+        function updateNavColors(activeTab) {
+            const navButtons = document.querySelectorAll('nav button');
+            navButtons[0].classList.replace(activeTab === 'Ev' ? 'text-gray-400' : 'text-blue-600', activeTab === 'Ev' ? 'text-blue-600' : 'text-gray-400');
+            navButtons[1].classList.replace(activeTab === 'Skorlar' ? 'text-gray-400' : 'text-blue-600', activeTab === 'Skorlar' ? 'text-blue-600' : 'text-gray-400');
+        }
+
+        checkUserSession(); 
+    </script>
+</body>
+</html>
