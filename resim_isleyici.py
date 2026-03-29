@@ -5,6 +5,7 @@ import os
 import glob
 import re
 import math
+import numpy as np  # YENİ: Türkçe karakterli yolları okumak için eklendi
 
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=True, max_num_hands=2, min_detection_confidence=0.5)
@@ -40,8 +41,13 @@ for unite in os.listdir(dataset_klasoru):
                 kelime_asamalari = []
                 
                 for resim_yolu in resimler:
-                    img = cv2.imread(resim_yolu)
-                    if img is None: continue
+                    # KRİTİK DÜZELTME: Türkçe karakter içeren dosya yollarını okumak için Numpy kullanıyoruz
+                    img_array = np.fromfile(resim_yolu, np.uint8)
+                    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+                    
+                    if img is None: 
+                        print(f"    [HATA] Dosya okunamadı (Bozuk olabilir): {os.path.basename(resim_yolu)}")
+                        continue
                     
                     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                     results = hands.process(img_rgb)

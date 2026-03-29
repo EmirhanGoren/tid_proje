@@ -1,6 +1,72 @@
 {
-    "Unite_1_Okul": {
-        "mudur": [
+    "Ünite_1_Okulun_Bölümleri": {
+        "Bahçe": [
+            [
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.434,
+                        "y": 0.413
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Kantin": [
+            [
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.437,
+                        "y": 0.413
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ],
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.359,
+                        "y": 0.486
+                    },
+                    "eller_arasi_mesafe": 0.272
+                },
+                {
+                    "parmaklar": [
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.63,
+                        "y": 0.507
+                    },
+                    "eller_arasi_mesafe": 0.272
+                }
+            ]
+        ],
+        "Müdür": [
             [
                 {
                     "parmaklar": [
@@ -34,59 +100,7 @@
                 }
             ]
         ],
-        "ogrenci": [
-            [
-                {
-                    "parmaklar": [
-                        "kapali",
-                        "acik",
-                        "acik",
-                        "acik",
-                        "acik"
-                    ],
-                    "konum": {
-                        "x": 0.377,
-                        "y": 0.438
-                    },
-                    "eller_arasi_mesafe": -1
-                }
-            ],
-            [
-                {
-                    "parmaklar": [
-                        "kapali",
-                        "acik",
-                        "kapali",
-                        "kapali",
-                        "kapali"
-                    ],
-                    "konum": {
-                        "x": 0.473,
-                        "y": 0.717
-                    },
-                    "eller_arasi_mesafe": -1
-                }
-            ]
-        ],
-        "ogretmen": [
-            [
-                {
-                    "parmaklar": [
-                        "kapali",
-                        "acik",
-                        "kapali",
-                        "kapali",
-                        "kapali"
-                    ],
-                    "konum": {
-                        "x": 0.365,
-                        "y": 0.466
-                    },
-                    "eller_arasi_mesafe": -1
-                }
-            ]
-        ],
-        "okul": [
+        "Okul": [
             [
                 {
                     "parmaklar": [
@@ -120,7 +134,7 @@
                 }
             ]
         ],
-        "sira": [
+        "Sıra": [
             [
                 {
                     "parmaklar": [
@@ -181,10 +195,298 @@
                     "eller_arasi_mesafe": 0.427
                 }
             ]
+        ],
+        "Tuvalet": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.208,
+                        "y": 0.387
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Öğrenci": [
+            [
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.377,
+                        "y": 0.438
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ],
+            [
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.473,
+                        "y": 0.717
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Öğretmen": [
+            [
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.365,
+                        "y": 0.466
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "İdare": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.497,
+                        "y": 0.465
+                    },
+                    "eller_arasi_mesafe": 0.184
+                },
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.681,
+                        "y": 0.451
+                    },
+                    "eller_arasi_mesafe": 0.184
+                }
+            ]
         ]
     },
-    "Unite_2_Gunluk": {
-        "merhaba": [
+    "Ünite_2_Günlük_Konuşmalar": {
+        "Adın Ne": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "kapali",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.464,
+                        "y": 0.551
+                    },
+                    "eller_arasi_mesafe": 0.178
+                },
+                {
+                    "parmaklar": [
+                        "acik",
+                        "kapali",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.641,
+                        "y": 0.54
+                    },
+                    "eller_arasi_mesafe": 0.178
+                }
+            ]
+        ],
+        "Evet": [
+            [
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.301,
+                        "y": 0.823
+                    },
+                    "eller_arasi_mesafe": 0.455
+                },
+                {
+                    "parmaklar": [
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.754,
+                        "y": 0.774
+                    },
+                    "eller_arasi_mesafe": 0.455
+                }
+            ]
+        ],
+        "Gelmek": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.424,
+                        "y": 0.507
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Gitmek": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.613,
+                        "y": 0.363
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Güle Güle": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.257,
+                        "y": 0.596
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Günaydın": [
+            [
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.427,
+                        "y": 0.628
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Hayır": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.557,
+                        "y": 0.61
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Memnun Oldum": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.278,
+                        "y": 0.768
+                    },
+                    "eller_arasi_mesafe": 0.474
+                },
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "kapali",
+                        "acik",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.751,
+                        "y": 0.755
+                    },
+                    "eller_arasi_mesafe": 0.474
+                }
+            ]
+        ],
+        "Merhaba": [
             [
                 {
                     "parmaklar": [
@@ -216,11 +518,129 @@
                     },
                     "eller_arasi_mesafe": -1
                 }
+            ],
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.311,
+                        "y": 0.34
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Nasılsın": [
+            [
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.285,
+                        "y": 0.681
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "Teşekkür Ederim": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.453,
+                        "y": 0.51
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ]
+        ],
+        "İyi Akşamlar": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "kapali",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.384,
+                        "y": 0.604
+                    },
+                    "eller_arasi_mesafe": 0.298
+                },
+                {
+                    "parmaklar": [
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.681,
+                        "y": 0.628
+                    },
+                    "eller_arasi_mesafe": 0.298
+                }
+            ]
+        ],
+        "İyiyim": [
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik",
+                        "acik"
+                    ],
+                    "konum": {
+                        "x": 0.257,
+                        "y": 0.706
+                    },
+                    "eller_arasi_mesafe": -1
+                }
+            ],
+            [
+                {
+                    "parmaklar": [
+                        "acik",
+                        "acik",
+                        "kapali",
+                        "kapali",
+                        "kapali"
+                    ],
+                    "konum": {
+                        "x": 0.35,
+                        "y": 0.614
+                    },
+                    "eller_arasi_mesafe": -1
+                }
             ]
         ]
     },
-    "Unite_3_Aile": {
-        "anne": [
+    "Ünite_3_Ailem_ve_Evim": {
+        "Anne": [
             [
                 {
                     "parmaklar": [
@@ -254,5 +674,9 @@
                 }
             ]
         ]
-    }
+    },
+    "Ünite_4_Hayvanlar_ve_Bitkiler": {},
+    "Ünite_5_Yiyecek_ve_İçecekler": {},
+    "Ünite_6_Giyecekler": {},
+    "Ünite_7_Meslekler": {}
 }
