@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TİD Mobil - Kusursuz Görüntü İşleme</title>
+    <title>TİD Mobil - Göreli Vektör Takibi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -201,11 +201,15 @@
         let wordStartTime = 0, isExamMode = false, examWordsList = [], currentExamWordIndex = 0, currentExamScore = 0;
         let isCameraActive = false, isCameraInitialized = false;
 
+        // GÖRELİ VEKTÖR REFERANS DEĞİŞKENİ
+        let referansKonumlar = [];
+
         let isTask1Mode = false; 
-        let task2TargetWord = ""; let task2TotalStages = 1; let task2CurrentStage = 1; let task2Interval = null;
+        let task2TargetWord = ""; let task2TotalStages = 1;
+        let task2CurrentStage = 1; let task2Interval = null;
         let jokerKullanildi = false;
 
-        let usersDB = JSON.parse(localStorage.getItem('tidUsersDatabase')) || {}; 
+        let usersDB = JSON.parse(localStorage.getItem('tidUsersDatabase')) || {};
         let activeUsername = localStorage.getItem('tidActiveUser'); 
         let userData = { username: "", password: "", totalScore: 0, unitScores: {}, exams: [], lives: 5, lastLifeUpdate: Date.now() };
 
@@ -234,7 +238,8 @@
                 icon.className = "fas fa-info-circle mr-2 text-xl";
             }
 
-            toast.style.opacity = '1'; toast.style.transform = 'translate(-50%, 0)';
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, 0)';
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translate(-50%, -20px)'; }, 3000);
         }
@@ -252,7 +257,8 @@
                 if (userData.lives === undefined) { userData.lives = 5; userData.lastLifeUpdate = Date.now(); }
                 updateHeaderUI(); document.getElementById('user-info-header').classList.remove('hidden'); loadData();
             } else {
-                changePage('login', 'SİSTEME GİRİŞ'); document.getElementById('user-info-header').classList.add('hidden');
+                changePage('login', 'SİSTEME GİRİŞ');
+                document.getElementById('user-info-header').classList.add('hidden');
             }
         }
 
@@ -275,7 +281,8 @@
                     timerElement.classList.remove('hidden');
                 } else timerElement.classList.add('hidden');
             } else {
-                userData.lastLifeUpdate = Date.now(); timerElement.classList.add('hidden');
+                userData.lastLifeUpdate = Date.now();
+                timerElement.classList.add('hidden');
             }
         }, 1000);
 
@@ -286,7 +293,8 @@
         }
 
         function registerUser() {
-            const user = document.getElementById('username-input').value.trim(); const pass = document.getElementById('password-input').value.trim();
+            const user = document.getElementById('username-input').value.trim();
+            const pass = document.getElementById('password-input').value.trim();
             if (user.length < 3 || pass.length < 3) return showToast("En az 3 haneli bilgi girin.", "error");
             if (usersDB[user]) return showToast("Bu kullanıcı adı alınmış.", "error");
             userData = { username: user, password: pass, totalScore: 0, unitScores: {}, exams: [], lives: 5, lastLifeUpdate: Date.now() };
@@ -295,7 +303,8 @@
         }
 
         function loginUser() {
-            const user = document.getElementById('username-input').value.trim(); const pass = document.getElementById('password-input').value.trim();
+            const user = document.getElementById('username-input').value.trim();
+            const pass = document.getElementById('password-input').value.trim();
             if (!usersDB[user]) return showToast("Kullanıcı bulunamadı.", "error"); 
             if (usersDB[user].password !== pass) return showToast("Hatalı şifre.", "error");
             activeUsername = user; userData = usersDB[user]; saveDatabase(); checkUserSession();
@@ -304,14 +313,16 @@
 
         function logoutUser() {
             if (confirm("Çıkış yapmak istediğine emin misin?")) {
-                localStorage.removeItem('tidActiveUser'); activeUsername = null;
+                localStorage.removeItem('tidActiveUser');
+                activeUsername = null;
                 document.getElementById('username-input').value = ""; document.getElementById('password-input').value = "";
                 checkUserSession();
             }
         }
 
         function saveDatabase() {
-            usersDB[userData.username] = userData; localStorage.setItem('tidUsersDatabase', JSON.stringify(usersDB)); 
+            usersDB[userData.username] = userData;
+            localStorage.setItem('tidUsersDatabase', JSON.stringify(usersDB)); 
             localStorage.setItem('tidActiveUser', activeUsername); updateHeaderUI();
         }
 
@@ -319,23 +330,28 @@
             const hintContainer = document.getElementById('hint-gif-container');
             if (!hintContainer.classList.contains('hidden')) { hintContainer.classList.add('hidden'); return; }
             if (userData.lives > 0) {
-                userData.lives--; if (userData.lives === 4) userData.lastLifeUpdate = Date.now(); saveDatabase();
+                userData.lives--;
+                if (userData.lives === 4) userData.lastLifeUpdate = Date.now(); saveDatabase();
                 let wordName = document.getElementById('target-word').innerText.toLocaleLowerCase('tr-TR').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/\s+/g, '_');
                 document.getElementById('hint-stage-num').innerText = mevcutAsama + 1;
                 document.getElementById('hint-gif').src = `gifs/${wordName}_${mevcutAsama + 1}.gif`;
-                hintContainer.classList.remove('hidden'); statusHint.innerText = "Görsel Rehber Aktif. Hareketi Taklit Et!"; statusHint.className = "text-blue-500 font-black text-sm mt-2";
+                hintContainer.classList.remove('hidden'); statusHint.innerText = "Görsel Rehber Aktif. Hareketi Taklit Et!";
+                statusHint.className = "text-blue-500 font-black text-sm mt-2";
             } else showToast("Yeterli canın yok! Yeni bir can için bekle.", "error");
         }
 
         async function loadData() {
             try {
-                const res = await fetch('veri_seti.json'); tumVeri = await res.json();
+                const res = await fetch('veri_seti.json');
+                tumVeri = await res.json();
                 renderUnits(); changePage('home', 'EĞİTİM HARİTASI'); updateNavColors('Harita');
-            } catch (e) { document.getElementById('unit-list').innerHTML = "<p class='text-red-500 font-bold'>HATA: veri_seti.json okunamadı!</p>"; }
+            } catch (e) { document.getElementById('unit-list').innerHTML = "<p class='text-red-500 font-bold'>HATA: veri_seti.json okunamadı!</p>";
+            }
         }
 
         function renderUnits() {
-            const list = document.getElementById('unit-list'); list.innerHTML = "";
+            const list = document.getElementById('unit-list');
+            list.innerHTML = "";
             Object.keys(tumVeri).forEach(unite => {
                 const b = document.createElement('button'); b.className = "w-full bg-white p-5 rounded-2xl border-b-4 border-gray-200 flex justify-between items-center mb-3 active:translate-y-1 active:border-b-0 shadow-sm transition-all";
                 b.innerHTML = `<span class="font-black text-gray-700 uppercase">${unite.replace(/_/g, ' ')}</span><i class="fas fa-play text-blue-500"></i>`;
@@ -344,7 +360,8 @@
         }
 
         function selectUnit(unite) {
-            secilenUnite = unite; document.getElementById('selected-unit-title').innerText = unite.replace(/_/g, ' ');
+            secilenUnite = unite;
+            document.getElementById('selected-unit-title').innerText = unite.replace(/_/g, ' ');
             const container = document.getElementById('word-container'); container.innerHTML = "";
             Object.keys(tumVeri[unite]).forEach(kelime => {
                 const b = document.createElement('button'); b.className = "bg-white p-4 rounded-xl border-b-4 border-blue-100 flex flex-col items-center active:translate-y-1 active:border-b-0 transition-all shadow-sm";
@@ -355,7 +372,8 @@
         }
 
         function getRandomWordData() {
-            const units = Object.keys(tumVeri); const rUnit = units[Math.floor(Math.random() * units.length)];
+            const units = Object.keys(tumVeri);
+            const rUnit = units[Math.floor(Math.random() * units.length)];
             const words = Object.keys(tumVeri[rUnit]); const rWord = words[Math.floor(Math.random() * words.length)];
             return { unit: rUnit, word: rWord, data: tumVeri[rUnit][rWord] };
         }
@@ -411,23 +429,28 @@
         }
 
         function startPracticeMode(kelime, unite=secilenUnite) {
-            isExamMode = false; isTask1Mode = false; jokerKullanildi = false;
+            isExamMode = false;
+            isTask1Mode = false; jokerKullanildi = false;
             document.getElementById('exam-header').classList.add('hidden'); document.getElementById('task-header').classList.add('hidden');
             setupWord(kelime, unite); startStudy();
         }
 
         function startExamMode() {
-            isExamMode = true; isTask1Mode = false; currentExamScore = 0; currentExamWordIndex = 0; jokerKullanildi = false;
-            examWordsList = [...Object.keys(tumVeri[secilenUnite])].sort(() => 0.5 - Math.random()).slice(0, 5); 
+            isExamMode = true;
+            isTask1Mode = false; currentExamScore = 0; currentExamWordIndex = 0; jokerKullanildi = false;
+            examWordsList = [...Object.keys(tumVeri[secilenUnite])].sort(() => 0.5 - Math.random()).slice(0, 5);
             document.getElementById('exam-header').classList.remove('hidden'); document.getElementById('task-header').classList.add('hidden');
             updateExamProgress(); setupWord(examWordsList[0]); startStudy();
         }
 
         function setupWord(kelime, unite=secilenUnite) {
-            secilenUnite = unite; hedefAsamalar = tumVeri[secilenUnite][kelime];
+            secilenUnite = unite;
+            hedefAsamalar = tumVeri[secilenUnite][kelime];
             document.getElementById('target-word').innerText = kelime;
             document.getElementById('step-info').innerText = `AŞAMA: 1 / ${hedefAsamalar.length}`;
-            mevcutAsama = 0; dogruYapildiMi = false; hareketKilidi = false;
+            mevcutAsama = 0; dogruYapildiMi = false;
+            hareketKilidi = false;
+            referansKonumlar = []; 
             errorFeedback.classList.add('hidden'); 
             document.getElementById('hint-btn').classList.remove('hidden'); 
             document.getElementById('hint-gif-container').classList.add('hidden'); 
@@ -448,7 +471,7 @@
         }
 
         function showTasks() {
-            if(task2Interval) clearInterval(task2Interval); 
+            if(task2Interval) clearInterval(task2Interval);
             changePage('tasks-page', 'GÖREVLER'); updateNavColors('Görevler');
         }
 
@@ -460,27 +483,26 @@
                 let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `<span class="text-gray-400 font-bold">${index + 1}</span>`;
                 const isMe = user.username === userData.username;
                 const el = document.createElement('div');
+                
                 el.className = `p-4 rounded-xl shadow-sm border flex justify-between items-center ${isMe ? "bg-blue-50 border-blue-200" : "bg-white border-gray-100"}`;
                 el.innerHTML = `<div class="flex items-center space-x-3"><div class="w-8 text-center text-xl">${medal}</div><p class="font-bold ${isMe ? 'text-blue-700' : 'text-gray-800'} uppercase">${user.username}</p></div><div class="bg-gray-100 text-gray-700 font-black px-3 py-1 rounded-lg">${user.totalScore}</div>`;
                 leaderList.appendChild(el);
             });
-
             const historyList = document.getElementById('exam-history-list'); historyList.innerHTML = "";
             if(userData.exams.length === 0) historyList.innerHTML = "<p class='text-center text-gray-400 text-sm mt-5'>Henüz hiç sınava girmedin.</p>";
             else {
                 [...userData.exams].reverse().forEach(exam => {
                     const el = document.createElement('div'); el.className = "bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center";
                     el.innerHTML = `<div><p class="font-bold text-gray-800 uppercase">${exam.unit.replace(/_/g, ' ')}</p><p class="text-xs text-gray-400">${exam.date}</p></div><div class="bg-blue-100 text-blue-700 font-black px-3 py-1 rounded-lg">+${exam.score}</div>`;
+            
                     historyList.appendChild(el);
                 });
             }
             changePage('score-page', 'SKOR TABLOSU'); updateNavColors('Skorlar');
         }
 
-        // --- KUSURSUZ AI MANTIĞI (State Machine) ---
         const hands = new Hands({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
         hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-
         hands.onResults((results) => {
             canvasElement.width = videoElement.videoWidth || 640; canvasElement.height = videoElement.videoHeight || 480;
             canvasCtx.save(); canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
@@ -488,7 +510,7 @@
             if (results.multiHandLandmarks) {
                 const currentHands = [];
                 for (const landmarks of results.multiHandLandmarks) {
-                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#3B82F6', lineWidth: 4}); 
+                     drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#3B82F6', lineWidth: 4}); 
                     drawLandmarks(canvasCtx, landmarks, {color: '#FFFFFF', lineWidth: 2, radius: 3}); 
                     currentHands.push(landmarks);
                 }
@@ -500,8 +522,8 @@
                     let suAnkiPozDogru = false;
                     let maxKonumHatasi = 0;
                     let parmakHataVarMi = false;
+                    let hareketYetersizGenel = false;
 
-                    // 1. KONTROL: JOKER VEYA HESAPLAMA
                     if (jokerKullanildi) {
                         suAnkiPozDogru = true;
                         jokerKullanildi = false;
@@ -511,73 +533,100 @@
                             let canliMesafe = currentHands.length === 2 ? Math.sqrt(Math.pow(currentHands[0][0].x - currentHands[1][0].x, 2) + Math.pow(currentHands[0][0].y - currentHands[1][0].y, 2)) : -1;
                             
                             for (let i = 0; i < hedef.length; i++) {
-                                const pTips = [8,12,16,20], pBases = [6,10,14,18]; 
+                                const pTips = [8,12,16,20], pBases = [6,10,14,18];
                                 let pDurum = [currentHands[i][4].x > currentHands[i][3].x ? "acik" : "kapali"];
                                 for(let j=0; j<4; j++) pDurum.push(currentHands[i][pTips[j]].y < currentHands[i][pBases[j]].y ? "acik" : "kapali");
                                 
                                 if (JSON.stringify(pDurum) !== JSON.stringify(hedef[i].parmaklar)) parmakHataVarMi = true;
-                                const konumHatasi = Math.sqrt(Math.pow(currentHands[i][0].x - hedef[i].konum.x, 2) + Math.pow(currentHands[i][0].y - hedef[i].konum.y, 2));
-                                if (konumHatasi > maxKonumHatasi) maxKonumHatasi = konumHatasi;
+                                
+                                const ax = currentHands[i][0].x, ay = currentHands[i][0].y;
+                                const hx = hedef[i].konum.x, hy = hedef[i].konum.y;
+                                let konumHatasi = Math.sqrt(Math.pow(ax - hx, 2) + Math.pow(ay - hy, 2));
 
+                                let hareketYetersiz = false;
+                                if (mevcutAsama > 0 && referansKonumlar[i] && hedefAsamalar[mevcutAsama - 1][i]) {
+                                    const beklenenFarkX = hx - hedefAsamalar[mevcutAsama - 1][i].konum.x;
+                                    const beklenenFarkY = hy - hedefAsamalar[mevcutAsama - 1][i].konum.y;
+                                    const beklenenMesafe = Math.sqrt(Math.pow(beklenenFarkX, 2) + Math.pow(beklenenFarkY, 2));
+
+                                    const gercekFarkX = ax - referansKonumlar[i].x;
+                                    const gercekFarkY = ay - referansKonumlar[i].y;
+                                    const gercekMesafe = Math.sqrt(Math.pow(gercekFarkX, 2) + Math.pow(gercekFarkY, 2));
+
+                                    // Eğer json'da belirgin bir kayma isteniyorsa
+                                    if (beklenenMesafe > 0.035) {
+                                        const yonUyumu = (beklenenFarkX * gercekFarkX) + (beklenenFarkY * gercekFarkY);
+                                        // Beklenenin %35'i kadar bile kaydırılmadıysa veya ters yöne gidildiyse
+                                        if (gercekMesafe < (beklenenMesafe * 0.35) || yonUyumu <= 0) {
+                                            hareketYetersiz = true;
+                                            hareketYetersizGenel = true;
+                                            konumHatasi = 99; 
+                                        }
+                                    }
+                                }
+
+                                if (konumHatasi > maxKonumHatasi) maxKonumHatasi = konumHatasi;
                                 let mesafeDogru = true;
                                 if (hedef[i].eller_arasi_mesafe !== -1 && canliMesafe !== -1 && Math.abs(canliMesafe - hedef[i].eller_arasi_mesafe) > MESAFE_ZORLUK) mesafeDogru = false;
                                 
-                                if (parmakHataVarMi || konumHatasi > KONUM_ZORLUK || !mesafeDogru) suAnkiPozDogru = false; 
+                                if (parmakHataVarMi || konumHatasi > KONUM_ZORLUK || !mesafeDogru || hareketYetersiz) {
+                                    suAnkiPozDogru = false; 
+                                }
                             }
                         } else {
-                            suAnkiPozDogru = false; // El sayısı uyuşmuyor
+                            suAnkiPozDogru = false;
                         }
                     }
 
-                    // 2. ARAYÜZ (UI) GÜNCELLEMESİ
                     if (suAnkiPozDogru) {
-                        errorFeedback.classList.add('hidden');
-                        
+                         errorFeedback.classList.add('hidden');
                         if (hareketKilidi) {
                             statusHint.innerText = "ELİNİ OYNAT VE DİĞER POZA GEÇ!";
                             statusHint.className = "text-orange-500 font-black text-sm mt-2";
                         } else {
-                            // AŞAMAYI GEÇ VEYA BİTİR
                             if (mevcutAsama < hedefAsamalar.length - 1) {
+                                // KRİTİK: İlk aşama doğruysa, ellerin o anki konumunu REFERANS olarak kaydet!
+                                referansKonumlar = currentHands.map(h => ({x: h[0].x, y: h[0].y}));
                                 mevcutAsama++; hareketKilidi = true; 
                                 document.getElementById('hint-gif-container').classList.add('hidden');
                                 document.getElementById('step-info').innerText = `AŞAMA: ${mevcutAsama+1} / ${hedefAsamalar.length}`;
                                 statusHint.innerText = "HARİKA! SIRADAKİ HAREKET..."; statusHint.className = "text-blue-500 font-black text-sm mt-2";
                             } else {
-                                // BİTİŞ MANTIĞI
-                                dogruYapildiMi = true; 
+                                dogruYapildiMi = true;
                                 document.getElementById('hint-btn').classList.add('hidden'); document.getElementById('hint-gif-container').classList.add('hidden'); 
                                 topPanel.classList.add('success-pulse');
 
                                 if (isTask1Mode) {
-                                    statusHint.innerText = "GÖREV TAMAMLANDI!"; statusHint.className = "text-orange-500 font-black text-lg mt-2";
+                                    statusHint.innerText = "GÖREV TAMAMLANDI!";
+                                    statusHint.className = "text-orange-500 font-black text-lg mt-2";
                                     userData.lives = Math.min(5, userData.lives + 1); saveDatabase();
-                                    animateHeart(); showPointAnimation(1, true); showToast("Harika! +1 ❤️ Can Kazandın!", "success");
+                                    animateHeart(); showPointAnimation(1, true);
+                                    showToast("Harika! +1 ❤️ Can Kazandın!", "success");
                                     setTimeout(() => { topPanel.classList.remove('success-pulse'); showTasks(); }, 2000);
                                 } else {
                                     const kazanilanPuan = calculateDynamicScore();
                                     statusHint.innerText = "MÜKEMMEL!"; statusHint.className = "text-green-600 font-black text-lg mt-2";
                                     showPointAnimation(kazanilanPuan);
-
                                     if (isExamMode) {
-                                        currentExamScore += kazanilanPuan; currentExamWordIndex++;
+                                        currentExamScore += kazanilanPuan;
+                                        currentExamWordIndex++;
                                         setTimeout(() => {
                                             topPanel.classList.remove('success-pulse');
                                             if (currentExamWordIndex < examWordsList.length) { updateExamProgress(); setupWord(examWordsList[currentExamWordIndex]);
-                                            } else {
+                                             } else {
                                                 userData.totalScore += currentExamScore; userData.exams.push({ unit: secilenUnite, score: currentExamScore, date: new Date().toLocaleDateString() });
                                                 saveDatabase(); showToast(`Sınav Bitti! +${currentExamScore} Puan`, "success"); setTimeout(stopStudy, 1500);
                                             }
                                         }, 2000);
                                     } else {
-                                        userData.totalScore += kazanilanPuan; saveDatabase(); setTimeout(stopStudy, 2000);
+                                        userData.totalScore += kazanilanPuan;
+                                        saveDatabase(); setTimeout(stopStudy, 2000);
                                     }
                                 }
                             }
                         }
-                    } else {
-                        // KULLANICI HATALI POZİSYONDA
-                        if (hareketKilidi) hareketKilidi = false; // Kilitliyse, elini oynattığı için kilidi aç
+                     } else {
+                        if (hareketKilidi) hareketKilidi = false;
                         
                         if (currentHands.length !== hedef.length) {
                             errorFeedback.classList.add('hidden');
@@ -585,11 +634,16 @@
                             statusHint.className = "text-red-500 text-sm mt-2 font-bold";
                         } else {
                             errorFeedback.classList.remove('hidden');
-                            errorFeedback.innerText = `Hata: ${maxKonumHatasi.toFixed(2)} (Lim:<${KONUM_ZORLUK}) | Parmak: ${parmakHataVarMi ? 'Yanlış' : 'Doğru'}`;
                             
-                            // Eğer görsel rehber kapalıysa pozisyon ayarlanıyor yaz
+                            // YENİ: KAYDIRMA HATASINI EKRANA BAS
+                            if (hareketYetersizGenel) {
+                                errorFeedback.innerText = "HATA: Elini beklenen yöne doğru kaydırmalısın!";
+                            } else {
+                                errorFeedback.innerText = `Hata: ${maxKonumHatasi.toFixed(2)} (Lim:<${KONUM_ZORLUK}) | Parmak: ${parmakHataVarMi ? 'Yanlış' : 'Doğru'}`;
+                            }
+                            
                             if(document.getElementById('hint-gif-container').classList.contains('hidden')) {
-                                statusHint.innerText = "Pozisyon Ayarlanıyor..."; 
+                                statusHint.innerText = "Pozisyon Ayarlanıyor...";
                                 statusHint.className = "text-gray-400 text-sm mt-2 font-bold";
                             }
                         }
@@ -600,14 +654,17 @@
         });
 
         const camera = new Camera(videoElement, { onFrame: async () => { if(isCameraActive) await hands.send({image: videoElement}); }, width: 640, height: 480 });
-
         function startStudy() { 
-            let title = 'ALIŞTIRMA MODU'; if(isExamMode) title = 'SINAV MODU'; else if(isTask1Mode) title = 'GÖREV MODU';
-            changePage('study', title); isCameraActive = true; if(!isCameraInitialized) { camera.start(); isCameraInitialized = true; } 
+            let title = 'ALIŞTIRMA MODU';
+            if(isExamMode) title = 'SINAV MODU'; else if(isTask1Mode) title = 'GÖREV MODU';
+            changePage('study', title); isCameraActive = true; if(!isCameraInitialized) { camera.start();
+            isCameraInitialized = true; } 
         }
-        function showHome() { isCameraActive = false; topPanel.classList.remove('success-pulse'); renderUnits(); changePage('home', 'EĞİTİM HARİTASI'); updateNavColors('Harita'); }
+        function showHome() { isCameraActive = false;
+            topPanel.classList.remove('success-pulse'); renderUnits(); changePage('home', 'EĞİTİM HARİTASI'); updateNavColors('Harita'); }
         function stopStudy() { 
-            isCameraActive = false; topPanel.classList.remove('success-pulse'); document.getElementById('hint-gif-container').classList.add('hidden');
+            isCameraActive = false;
+            topPanel.classList.remove('success-pulse'); document.getElementById('hint-gif-container').classList.add('hidden');
             if (isTask1Mode) showTasks(); else changePage('word-list-page', 'KELİMELER'); 
         }
         
